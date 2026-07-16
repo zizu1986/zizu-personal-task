@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENG Task Dashboard - CSV Brute Force</title>
+    <title>ENG Task Dashboard - Assignee Fillable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -21,7 +21,6 @@
         .sort-icon::after { content: ' '; font-size: 0.8em; opacity: 0.5; }
         .sort-asc::after { content: ' ↑'; opacity: 1; color: #3b82f6; }
         .sort-desc::after { content: ' ↓'; opacity: 1; color: #3b82f6; }
-        .alert-box { background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; display: none; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
@@ -40,11 +39,6 @@
                 <button id="addTaskBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">➕ Add Task</button>
                 <button id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">💾 Export</button>
             </div>
-        </div>
-
-        <div id="alertBox" class="alert-box">
-            <h3 class="font-bold text-red-800">️ File Truncation Detected</h3>
-            <p class="text-red-700 text-sm mt-1">The browser only found <b id="alertCount">57</b> rows. This means your uploaded `.xlsx` file is physically missing data after row 58. Please open your original Excel file, press Ctrl+A, Copy, Paste into a NEW blank Excel file, save it, and upload that new file.</p>
         </div>
 
         <!-- Summary Analysis Cards -->
@@ -193,7 +187,7 @@
             });
         }
 
-        // CSV BRUTE FORCE READER
+        // File Upload
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -204,28 +198,24 @@
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     
-                    // FORCE RANGE
+                    // FORCE RANGE to bypass Excel's broken "Used Range" metadata
                     worksheet['!ref'] = 'A1:Z1000'; 
                     
-                    // BRUTE FORCE: Convert to CSV first, which often bypasses JSON parser bugs
-                    const csvString = XLSX.utils.sheet_to_csv(worksheet, { FS: "\t", blankrows: true });
-                    const csvRows = csvString.split('\n').map(row => row.split('\t'));
-                    
-                    console.log(`CSV Brute Force found ${csvRows.length} raw rows.`);
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "", blankrows: false });
+                    console.log(`Raw rows read from forced range: ${jsonData.length}`);
 
-                    // Find header row
                     let headerRowIndex = 0;
-                    for (let i = 0; i < Math.min(csvRows.length, 20); i++) {
-                        if (csvRows[i] && csvRows[i].some(cell => cell && cell.toString().toLowerCase().includes('task'))) {
+                    for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
+                        if (jsonData[i] && jsonData[i].some(cell => cell && cell.toString().toLowerCase().includes('task'))) {
                             headerRowIndex = i; break;
                         }
                     }
                     
-                    headers = csvRows[headerRowIndex].map(h => h ? h.toString().trim() : "");
+                    headers = jsonData[headerRowIndex].map(h => h ? h.toString().trim() : "");
                     rawData = [];
                     
-                    for (let i = headerRowIndex + 1; i < csvRows.length; i++) {
-                        const row = csvRows[i];
+                    for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
                         if (!row) continue;
                         const hasContent = row.some(cell => cell !== undefined && cell !== null && cell.toString().trim() !== "");
                         if (hasContent) {
@@ -235,7 +225,6 @@
                         }
                     }
 
-                    // Remove duplicates
                     const seen = new Set();
                     rawData = rawData.filter(row => {
                         const key = (row['Task'] || '') + '|' + (row['Task status'] || '');
@@ -243,13 +232,7 @@
                         seen.add(key); return true;
                     });
 
-                    // Show alert if still truncated
-                    if (rawData.length < 100) {
-                        document.getElementById('alertBox').style.display = 'block';
-                        document.getElementById('alertCount').textContent = rawData.length;
-                    } else {
-                        document.getElementById('alertBox').style.display = 'none';
-                    }
+                    console.log(`Final tasks after filtering: ${rawData.length}`);
 
                     saveToLocalStorage();
                     initDashboard();
@@ -327,7 +310,7 @@
         function generateInsights(total, completed, going, postponed) {
             const insights = [];
             const postponeRate = total > 0 ? (postponed / total) * 100 : 0;
-            if (postponeRate > 30) insights.push(`️ High postponement rate (${Math.round(postponeRate)}%) - review resource allocation`);
+            if (postponeRate > 30) insights.push(`⚠️ High postponement rate (${Math.round(postponeRate)}%) - review resource allocation`);
             
             const overdue = rawData.filter(r => {
                 if (!r['Due Date']) return false;
@@ -361,30 +344,77 @@
             });
         }
 
+        // *** UPDATED: Assignee now uses text input with datalist for free typing + suggestions ***
         function makeEditable(cell, rowIndex, colName, currentValue) {
             cell.innerHTML = '';
             let input;
-            if (['Task status', 'Priority', 'Assignee', 'Type', 'Type of task', 'Checker', 'Dependency'].includes(colName)) {
-                input = document.createElement('select'); input.className = 'smart-input';
-                let options = [...new Set(rawData.map(r => r[colName]).filter(v => v))]; options.unshift(''); 
+
+            if (['Task status', 'Priority', 'Type', 'Type of task', 'Checker', 'Dependency'].includes(colName)) {
+                // Strict dropdown for these
+                input = document.createElement('select'); 
+                input.className = 'smart-input';
+                let options = [...new Set(rawData.map(r => r[colName]).filter(v => v))]; 
+                options.unshift(''); 
                 options.forEach(opt => {
-                    const option = document.createElement('option'); option.value = opt; option.textContent = opt || '(Blank)';
-                    if (opt === currentValue) option.selected = true; input.appendChild(option);
+                    const option = document.createElement('option'); 
+                    option.value = opt; 
+                    option.textContent = opt || '(Blank)';
+                    if (opt === currentValue) option.selected = true; 
+                    input.appendChild(option);
+                });
+            } else if (colName === 'Assignee') {
+                // Free text input with autocomplete suggestions
+                input = document.createElement('input'); 
+                input.type = 'text'; 
+                input.className = 'smart-input'; 
+                input.value = currentValue || '';
+                input.setAttribute('list', 'assignee-datalist');
+                
+                // Create or update datalist
+                let datalist = document.getElementById('assignee-datalist');
+                if (!datalist) {
+                    datalist = document.createElement('datalist');
+                    datalist.id = 'assignee-datalist';
+                    document.body.appendChild(datalist);
+                }
+                datalist.innerHTML = '';
+                let assignees = [...new Set(rawData.map(r => r['Assignee']).filter(v => v))];
+                assignees.forEach(a => {
+                    const option = document.createElement('option');
+                    option.value = a;
+                    datalist.appendChild(option);
                 });
             } else if (colName.includes('Date')) {
-                input = document.createElement('input'); input.type = 'date'; input.className = 'smart-input'; input.value = formatDateForInput(currentValue);
+                input = document.createElement('input'); 
+                input.type = 'date'; 
+                input.className = 'smart-input'; 
+                input.value = formatDateForInput(currentValue);
             } else {
-                input = document.createElement('input'); input.type = 'text'; input.className = 'smart-input'; input.value = currentValue || '';
+                input = document.createElement('input'); 
+                input.type = 'text'; 
+                input.className = 'smart-input'; 
+                input.value = currentValue || '';
             }
-            cell.appendChild(input); input.focus();
+            
+            cell.appendChild(input); 
+            input.focus();
+            
             const saveValue = () => {
                 let newVal = input.value;
                 if (colName.includes('Date') && newVal) rawData[rowIndex][colName] = new Date(newVal);
                 else rawData[rowIndex][colName] = newVal;
-                saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast();
+                saveToLocalStorage(); 
+                renderTable(); 
+                updateMetrics(); 
+                generateAnalysis(); 
+                showToast();
             };
+            
             input.addEventListener('blur', saveValue);
-            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); input.blur(); } if (e.key === 'Escape') { input.removeEventListener('blur', saveValue); renderTable(); } });
+            input.addEventListener('keydown', (e) => { 
+                if (e.key === 'Enter') { e.preventDefault(); input.blur(); } 
+                if (e.key === 'Escape') { input.removeEventListener('blur', saveValue); renderTable(); } 
+            });
         }
 
         function renderTable() {
@@ -410,7 +440,7 @@
                 }
 
                 const tdAction = document.createElement('td'); tdAction.className = 'px-4 py-3 text-sm text-center';
-                const delBtn = document.createElement('button'); delBtn.innerHTML = '🗑️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
+                const delBtn = document.createElement('button'); delBtn.innerHTML = '️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
                 delBtn.onclick = () => { if(confirm('Delete this task?')) { rawData.splice(rowIndex, 1); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("Task deleted"); } };
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
 
@@ -474,14 +504,14 @@
             XLSX.writeFile(wb, "ENG_Tasks_Updated.xlsx"); showToast("Exported!");
         });
 
-        function saveToLocalStorage() { localStorage.setItem('eng_dashboard_csv_fix', JSON.stringify({ headers, rawData })); }
+        function saveToLocalStorage() { localStorage.setItem('eng_dashboard_assignee_fix', JSON.stringify({ headers, rawData })); }
 
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterStatus').addEventListener('change', renderTable);
         document.getElementById('filterAssignee').addEventListener('change', renderTable);
 
         window.onload = function() {
-            const saved = localStorage.getItem('eng_dashboard_csv_fix');
+            const saved = localStorage.getItem('eng_dashboard_assignee_fix');
             if (saved) {
                 const parsed = JSON.parse(saved); headers = parsed.headers;
                 rawData = parsed.rawData.map(row => {

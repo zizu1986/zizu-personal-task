@@ -6,9 +6,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>ENG Task Dashboard - Themed</title>
+    <title>ENG Task Dashboard</title>
     
-    <!-- Tailwind Config for Theme Variables -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -30,7 +29,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- THEME VARIABLES (Black text for light themes, White text for dark theme) --- */
+        /* --- THEME VARIABLES (White for Dark, Black for others) --- */
         :root {
             --main-bg: #f9fafb;
             --card-bg: #ffffff;
@@ -96,9 +95,8 @@
                 <p class="text-textmuted mt-1" id="statusText">Upload your Excel file to begin</p>
             </div>
             <div class="flex flex-wrap gap-3">
-                <!-- THEME SELECTOR -->
                 <select id="themeSelector" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-                    <option value="light">☀️ Light</option>
+                    <option value="light">️ Light</option>
                     <option value="dark">🌙 Dark</option>
                     <option value="ocean">🌊 Ocean</option>
                     <option value="forest">🌲 Forest</option>
@@ -109,7 +107,7 @@
                     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden">
                 </label>
                 <button id="addTaskBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">➕ Add Task</button>
-                <button id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">💾 Export</button>
+                <button id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden"> Export</button>
             </div>
         </div>
 
@@ -175,7 +173,7 @@
 
         <!-- Filters -->
         <div class="bg-cardbg p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-bordercol">
-            <input type="text" id="searchInput" placeholder=" Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="searchInput" placeholder="🔍 Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
             <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="">All Statuses</option>
             </select>
@@ -197,7 +195,7 @@
         </div>
         
         <div id="insightsSection" class="mt-6 bg-cardbg border-l-4 border-blue-500 p-4 rounded border border-bordercol hidden">
-            <h3 class="font-semibold text-blue-500 mb-2">📊 Key Insights:</h3>
+            <h3 class="font-semibold text-blue-500 mb-2"> Key Insights:</h3>
             <ul class="text-sm text-textmain space-y-1" id="insightsList"></ul>
         </div>
     </div>
@@ -402,7 +400,7 @@
             if (overdue > 0) insights.push(`🚨 ${overdue} tasks are overdue and need immediate attention`);
             
             const completionRate = total > 0 ? (completed / total) * 100 : 0;
-            if (completionRate < 40) insights.push(` Low completion rate (${Math.round(completionRate)}%) - review priorities`);
+            if (completionRate < 40) insights.push(`📉 Low completion rate (${Math.round(completionRate)}%) - review priorities`);
             if (going > 10) insights.push(`🔄 ${going} tasks in progress - monitor capacity`);
             
             document.getElementById('insightsList').innerHTML = insights.map(i => `<li>${i}</li>`).join('');
@@ -518,12 +516,13 @@
                 }
 
                 const tdAction = document.createElement('td'); tdAction.className = 'px-4 py-3 text-sm text-center';
-                const delBtn = document.createElement('button'); delBtn.innerHTML = '️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
+                const delBtn = document.createElement('button'); delBtn.innerHTML = '🗑️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
                 delBtn.onclick = () => { if(confirm('Delete this task?')) { rawData.splice(rowIndex, 1); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("Task deleted"); } };
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
 
                 getDisplayHeaders().forEach(h => {
                     const td = document.createElement('td'); 
+                    // No text color class here, so it inherits black/white from body, but allows status colors to override
                     td.className = 'px-4 py-3 text-sm editable-cell'; 
                     let val = row[h];
                     if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString();
@@ -583,14 +582,14 @@
             XLSX.writeFile(wb, "ENG_Tasks_Updated.xlsx"); showToast("Exported!");
         });
 
-        function saveToLocalStorage() { localStorage.setItem('eng_dashboard_themed', JSON.stringify({ headers, rawData })); }
+        function saveToLocalStorage() { localStorage.setItem('eng_dashboard_themed_final', JSON.stringify({ headers, rawData })); }
 
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterStatus').addEventListener('change', renderTable);
         document.getElementById('filterAssignee').addEventListener('change', renderTable);
 
         window.onload = function() {
-            const saved = localStorage.getItem('eng_dashboard_themed');
+            const saved = localStorage.getItem('eng_dashboard_themed_final');
             if (saved) {
                 const parsed = JSON.parse(saved); headers = parsed.headers;
                 rawData = parsed.rawData.map(row => {

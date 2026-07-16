@@ -3,35 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENG Task Dashboard - Assignee Fillable</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ENG Task Dashboard - Themed</title>
+    
+    <!-- Tailwind Config for Theme Variables -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mainbg: 'var(--main-bg)',
+                        cardbg: 'var(--card-bg)',
+                        textmain: 'var(--text-main)',
+                        textmuted: 'var(--text-muted)',
+                        bordercol: 'var(--border-col)',
+                        headerbg: 'var(--header-bg)',
+                    }
+                }
+            }
+        }
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --main-bg: #f9fafb;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-col: #e5e7eb;
+            --header-bg: #f3f4f6;
+        }
+        [data-theme="dark"] {
+            --main-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-col: #334155;
+            --header-bg: #1e293b;
+        }
+        [data-theme="ocean"] {
+            --main-bg: #eff6ff;
+            --card-bg: #ffffff;
+            --text-main: #1e3a8a;
+            --text-muted: #64748b;
+            --border-col: #bfdbfe;
+            --header-bg: #dbeafe;
+        }
+        [data-theme="forest"] {
+            --main-bg: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-main: #14532d;
+            --text-muted: #4b5563;
+            --border-col: #bbf7d0;
+            --header-bg: #dcfce7;
+        }
+
+        /* --- UI STYLES --- */
+        body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         .editable-cell { cursor: pointer; transition: all 0.2s; }
-        .editable-cell:hover { background-color: #eff6ff; outline: 2px dashed #3b82f6; outline-offset: -2px; }
-        .smart-input { width: 100%; min-width: 120px; padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 4px; font-size: 0.875rem; outline: none; background: white; }
+        .editable-cell:hover { background-color: var(--header-bg); outline: 2px dashed #3b82f6; outline-offset: -2px; }
+        .smart-input { width: 100%; min-width: 120px; padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 4px; font-size: 0.875rem; outline: none; background: var(--card-bg); color: var(--text-main); }
         .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 50; }
         .toast.show { transform: translateY(0); opacity: 1; }
         td, th { white-space: nowrap; }
         .sort-header { cursor: pointer; user-select: none; }
-        .sort-header:hover { background-color: #e5e7eb; }
+        .sort-header:hover { background-color: var(--header-bg); }
         .sort-icon::after { content: ' '; font-size: 0.8em; opacity: 0.5; }
         .sort-asc::after { content: ' ↑'; opacity: 1; color: #3b82f6; }
         .sort-desc::after { content: ' ↓'; opacity: 1; color: #3b82f6; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="font-sans">
 
     <div class="container mx-auto p-4 md:p-8 max-w-full">
+        <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">🛠️ Engineering Task Dashboard</h1>
-                <p class="text-gray-500 mt-1" id="statusText">Upload your Excel file to begin</p>
+                <h1 class="text-3xl font-bold">🛠️ Engineering Task Dashboard</h1>
+                <p class="text-textmuted mt-1" id="statusText">Upload your Excel file to begin</p>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-wrap gap-3">
+                <!-- THEME SELECTOR -->
+                <select id="themeSelector" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                    <option value="light">☀️ Light</option>
+                    <option value="dark">🌙 Dark</option>
+                    <option value="ocean">🌊 Ocean</option>
+                    <option value="forest">🌲 Forest</option>
+                </select>
+
                 <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
                      Upload Excel
                     <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden">
@@ -67,66 +134,66 @@
 
         <!-- Charts Section -->
         <div id="chartsSection" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 hidden">
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="font-semibold mb-2 text-sm text-gray-700">Task Status</h3>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol">
+                <h3 class="font-semibold mb-2 text-sm text-textmain">Task Status</h3>
                 <div style="height: 150px;"><canvas id="statusChart"></canvas></div>
             </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="font-semibold mb-2 text-sm text-gray-700">Task Type</h3>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol">
+                <h3 class="font-semibold mb-2 text-sm text-textmain">Task Type</h3>
                 <div style="height: 150px;"><canvas id="typeChart"></canvas></div>
             </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="font-semibold mb-2 text-sm text-gray-700">Priority</h3>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol">
+                <h3 class="font-semibold mb-2 text-sm text-textmain">Priority</h3>
                 <div style="height: 150px;"><canvas id="priorityChart"></canvas></div>
             </div>
         </div>
 
         <!-- Metrics -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
-                <p class="text-sm text-gray-500">Total Tasks</p>
-                <p id="metricTotal" class="text-2xl font-bold">0</p>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-blue-500 border border-bordercol">
+                <p class="text-sm text-textmuted">Total Tasks</p>
+                <p id="metricTotal" class="text-2xl font-bold text-textmain">0</p>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-yellow-500">
-                <p class="text-sm text-gray-500">Going</p>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 border border-bordercol">
+                <p class="text-sm text-textmuted">Going</p>
                 <p id="metricGoing" class="text-2xl font-bold text-yellow-600">0</p>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
-                <p class="text-sm text-gray-500">Completed</p>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-green-500 border border-bordercol">
+                <p class="text-sm text-textmuted">Completed</p>
                 <p id="metricDone" class="text-2xl font-bold text-green-600">0</p>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
-                <p class="text-sm text-gray-500">🚨 Overdue</p>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-red-500 border border-bordercol">
+                <p class="text-sm text-textmuted">🚨 Overdue</p>
                 <p id="metricOverdue" class="text-2xl font-bold text-red-600">0</p>
             </div>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-gray-100">
-            <input type="text" id="searchInput" placeholder="🔍 Search Task or Remark..." class="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
-            <select id="filterStatus" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        <div class="bg-cardbg p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-bordercol">
+            <input type="text" id="searchInput" placeholder=" Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+            <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="">All Statuses</option>
             </select>
-            <select id="filterAssignee" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <select id="filterAssignee" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="">All Assignees</option>
             </select>
         </div>
 
         <!-- Data Table -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+        <div class="bg-cardbg rounded-xl shadow-sm overflow-hidden border border-bordercol">
             <div class="overflow-x-auto scrollbar-thin max-h-[65vh]">
-                <table class="min-w-full divide-y divide-gray-200" id="dataTable">
-                    <thead class="bg-gray-100 sticky top-0 z-10">
+                <table class="min-w-full divide-y divide-bordercol" id="dataTable">
+                    <thead class="bg-headerbg sticky top-0 z-10">
                         <tr id="tableHeader"></tr>
                     </thead>
-                    <tbody id="tableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                    <tbody id="tableBody" class="bg-cardbg divide-y divide-bordercol"></tbody>
                 </table>
             </div>
         </div>
         
-        <div id="insightsSection" class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded hidden">
-            <h3 class="font-semibold text-blue-900 mb-2">📊 Key Insights:</h3>
-            <ul class="text-sm text-blue-800 space-y-1" id="insightsList"></ul>
+        <div id="insightsSection" class="mt-6 bg-cardbg border-l-4 border-blue-500 p-4 rounded border border-bordercol hidden">
+            <h3 class="font-semibold text-blue-600 mb-2">📊 Key Insights:</h3>
+            <ul class="text-sm text-textmain space-y-1" id="insightsList"></ul>
         </div>
     </div>
 
@@ -140,6 +207,19 @@
         let statusChartInstance = null, typeChartInstance = null, priorityChartInstance = null;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+
+        // --- THEME LOGIC ---
+        const themeSelector = document.getElementById('themeSelector');
+        const savedTheme = localStorage.getItem('dashboard_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeSelector.value = savedTheme;
+
+        themeSelector.addEventListener('change', (e) => {
+            const theme = e.target.value;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dashboard_theme', theme);
+            showToast(`Theme changed to ${theme}!`);
+        });
 
         function showToast(msg = "Changes saved!") {
             const toast = document.getElementById('toast');
@@ -197,12 +277,8 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    
-                    // FORCE RANGE to bypass Excel's broken "Used Range" metadata
                     worksheet['!ref'] = 'A1:Z1000'; 
-                    
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "", blankrows: false });
-                    console.log(`Raw rows read from forced range: ${jsonData.length}`);
 
                     let headerRowIndex = 0;
                     for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
@@ -231,8 +307,6 @@
                         if (seen.has(key)) return false;
                         seen.add(key); return true;
                     });
-
-                    console.log(`Final tasks after filtering: ${rawData.length}`);
 
                     saveToLocalStorage();
                     initDashboard();
@@ -283,7 +357,7 @@
                 priorityCounts[r['Priority'] || 'Not Set'] = (priorityCounts[r['Priority'] || 'Not Set'] || 0) + 1;
             });
             
-            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } };
+            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: getComputedStyle(document.body).getPropertyValue('--text-main') } } } };
             
             if (statusChartInstance) statusChartInstance.destroy();
             statusChartInstance = new Chart(document.getElementById('statusChart').getContext('2d'), {
@@ -296,7 +370,7 @@
             typeChartInstance = new Chart(document.getElementById('typeChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#667eea' }] },
-                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 } } }, y: { beginAtZero: true, ticks: { font: { size: 8 } } } } }
+                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 }, color: getComputedStyle(document.body).getPropertyValue('--text-muted') } }, y: { beginAtZero: true, ticks: { font: { size: 8 }, color: getComputedStyle(document.body).getPropertyValue('--text-muted') } } } }
             });
 
             if (priorityChartInstance) priorityChartInstance.destroy();
@@ -317,7 +391,7 @@
                 const dueDate = r['Due Date'] instanceof Date ? r['Due Date'] : new Date(r['Due Date']);
                 return dueDate < today && !['done', 'on time done'].includes((r['Task status'] || '').toLowerCase());
             }).length;
-            if (overdue > 0) insights.push(` ${overdue} tasks are overdue and need immediate attention`);
+            if (overdue > 0) insights.push(`🚨 ${overdue} tasks are overdue and need immediate attention`);
             
             const completionRate = total > 0 ? (completed / total) * 100 : 0;
             if (completionRate < 40) insights.push(`📉 Low completion rate (${Math.round(completionRate)}%) - review priorities`);
@@ -335,22 +409,20 @@
 
         function renderHeaders() {
             const headerRow = document.getElementById('tableHeader');
-            headerRow.innerHTML = '<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>';
+            headerRow.innerHTML = '<th class="px-4 py-3 text-left text-xs font-medium text-textmuted uppercase tracking-wider">Actions</th>';
             getDisplayHeaders().forEach(h => {
                 const th = document.createElement('th');
-                th.className = 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sort-header sort-icon';
+                th.className = 'px-4 py-3 text-left text-xs font-medium text-textmuted uppercase tracking-wider sort-header sort-icon';
                 th.textContent = h; th.dataset.column = h; th.onclick = () => sortData(h);
                 headerRow.appendChild(th);
             });
         }
 
-        // *** UPDATED: Assignee now uses text input with datalist for free typing + suggestions ***
         function makeEditable(cell, rowIndex, colName, currentValue) {
             cell.innerHTML = '';
             let input;
 
             if (['Task status', 'Priority', 'Type', 'Type of task', 'Checker', 'Dependency'].includes(colName)) {
-                // Strict dropdown for these
                 input = document.createElement('select'); 
                 input.className = 'smart-input';
                 let options = [...new Set(rawData.map(r => r[colName]).filter(v => v))]; 
@@ -363,14 +435,12 @@
                     input.appendChild(option);
                 });
             } else if (colName === 'Assignee') {
-                // Free text input with autocomplete suggestions
                 input = document.createElement('input'); 
                 input.type = 'text'; 
                 input.className = 'smart-input'; 
                 input.value = currentValue || '';
                 input.setAttribute('list', 'assignee-datalist');
                 
-                // Create or update datalist
                 let datalist = document.getElementById('assignee-datalist');
                 if (!datalist) {
                     datalist = document.createElement('datalist');
@@ -433,19 +503,19 @@
                 if (fAssignee && assignee !== fAssignee) return;
                 if (search && !task.includes(search) && !remark.includes(search)) return;
 
-                const tr = document.createElement('tr'); tr.className = 'hover:bg-gray-50';
+                const tr = document.createElement('tr'); tr.className = 'hover:bg-headerbg';
                 if (row['Due Date']) {
                     let dDate = new Date(row['Due Date']);
                     if (!isNaN(dDate) && dDate < today && !['done', 'on time done'].includes(status)) tr.classList.add('bg-red-50');
                 }
 
                 const tdAction = document.createElement('td'); tdAction.className = 'px-4 py-3 text-sm text-center';
-                const delBtn = document.createElement('button'); delBtn.innerHTML = '️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
+                const delBtn = document.createElement('button'); delBtn.innerHTML = '🗑️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
                 delBtn.onclick = () => { if(confirm('Delete this task?')) { rawData.splice(rowIndex, 1); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("Task deleted"); } };
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
 
                 getDisplayHeaders().forEach(h => {
-                    const td = document.createElement('td'); td.className = 'px-4 py-3 text-sm text-gray-700 editable-cell';
+                    const td = document.createElement('td'); td.className = 'px-4 py-3 text-sm text-textmain editable-cell';
                     let val = row[h];
                     if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString();
                     else td.textContent = val || '';
@@ -504,14 +574,14 @@
             XLSX.writeFile(wb, "ENG_Tasks_Updated.xlsx"); showToast("Exported!");
         });
 
-        function saveToLocalStorage() { localStorage.setItem('eng_dashboard_assignee_fix', JSON.stringify({ headers, rawData })); }
+        function saveToLocalStorage() { localStorage.setItem('eng_dashboard_themed', JSON.stringify({ headers, rawData })); }
 
         document.getElementById('searchInput').addEventListener('input', renderTable);
         document.getElementById('filterStatus').addEventListener('change', renderTable);
         document.getElementById('filterAssignee').addEventListener('change', renderTable);
 
         window.onload = function() {
-            const saved = localStorage.getItem('eng_dashboard_assignee_fix');
+            const saved = localStorage.getItem('eng_dashboard_themed');
             if (saved) {
                 const parsed = JSON.parse(saved); headers = parsed.headers;
                 rawData = parsed.rawData.map(row => {

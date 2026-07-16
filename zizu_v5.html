@@ -30,36 +30,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- THEME VARIABLES (Fixed Text Colors) --- */
+        /* --- THEME VARIABLES (Black text for light themes, White text for dark theme) --- */
         :root {
             --main-bg: #f9fafb;
             --card-bg: #ffffff;
-            --text-main: #1f2937; /* Neutral dark gray */
-            --text-muted: #6b7280;
+            --text-main: #000000; /* Pure Black */
+            --text-muted: #4b5563;
             --border-col: #e5e7eb;
             --header-bg: #f3f4f6;
         }
         [data-theme="dark"] {
             --main-bg: #0f172a;
             --card-bg: #1e293b;
-            --text-main: #f1f5f9; /* Light gray for dark mode */
-            --text-muted: #94a3b8;
+            --text-main: #ffffff; /* Pure White */
+            --text-muted: #d1d5db;
             --border-col: #334155;
             --header-bg: #1e293b;
         }
         [data-theme="ocean"] {
-            --main-bg: #f0f9ff; /* Light blue background */
+            --main-bg: #f0f9ff;
             --card-bg: #ffffff;
-            --text-main: #0f172a; /* Neutral dark text (NOT blue) */
-            --text-muted: #475569;
+            --text-main: #000000; /* Pure Black */
+            --text-muted: #4b5563;
             --border-col: #bae6fd;
             --header-bg: #e0f2fe;
         }
         [data-theme="forest"] {
-            --main-bg: #f0fdf4; /* Light green background */
+            --main-bg: #f0fdf4;
             --card-bg: #ffffff;
-            --text-main: #0f172a; /* Neutral dark text (NOT green) */
-            --text-muted: #475569;
+            --text-main: #000000; /* Pure Black */
+            --text-muted: #4b5563;
             --border-col: #a7f3d0;
             --header-bg: #d1fae5;
         }
@@ -101,7 +101,7 @@
                     <option value="light">☀️ Light</option>
                     <option value="dark">🌙 Dark</option>
                     <option value="ocean">🌊 Ocean</option>
-                    <option value="forest"> Forest</option>
+                    <option value="forest">🌲 Forest</option>
                 </select>
 
                 <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
@@ -518,13 +518,12 @@
                 }
 
                 const tdAction = document.createElement('td'); tdAction.className = 'px-4 py-3 text-sm text-center';
-                const delBtn = document.createElement('button'); delBtn.innerHTML = '🗑️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
+                const delBtn = document.createElement('button'); delBtn.innerHTML = '️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
                 delBtn.onclick = () => { if(confirm('Delete this task?')) { rawData.splice(rowIndex, 1); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("Task deleted"); } };
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
 
                 getDisplayHeaders().forEach(h => {
                     const td = document.createElement('td'); 
-                    // REMOVED text-textmain from td so status colors can work perfectly
                     td.className = 'px-4 py-3 text-sm editable-cell'; 
                     let val = row[h];
                     if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString();

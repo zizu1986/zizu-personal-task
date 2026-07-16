@@ -66,9 +66,19 @@
 
         /* --- UI STYLES --- */
         body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        
+        /* Force text colors to use theme variables globally to prevent dark-on-dark bugs */
+        h1, h2, h3, p, span, label, th, td { color: var(--text-main); }
+        .text-muted-override { color: var(--text-muted) !important; }
+        
         .editable-cell { cursor: pointer; transition: all 0.2s; }
         .editable-cell:hover { background-color: var(--header-bg); outline: 2px dashed #3b82f6; outline-offset: -2px; }
         .smart-input { width: 100%; min-width: 120px; padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 4px; font-size: 0.875rem; outline: none; background: var(--card-bg); color: var(--text-main); }
+        
+        /* Fix placeholders and dropdown arrows in dark mode */
+        ::placeholder { color: var(--text-muted) !important; opacity: 1; }
+        select option { background-color: var(--card-bg); color: var(--text-main); }
+        
         .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 50; }
@@ -87,7 +97,7 @@
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-bold">🛠️ Engineering Task Dashboard</h1>
+                <h1 class="text-3xl font-bold text-textmain">🛠️ Engineering Task Dashboard</h1>
                 <p class="text-textmuted mt-1" id="statusText">Upload your Excel file to begin</p>
             </div>
             <div class="flex flex-wrap gap-3">
@@ -170,7 +180,7 @@
 
         <!-- Filters -->
         <div class="bg-cardbg p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-bordercol">
-            <input type="text" id="searchInput" placeholder=" Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="searchInput" placeholder="🔍 Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
             <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="">All Statuses</option>
             </select>
@@ -192,7 +202,7 @@
         </div>
         
         <div id="insightsSection" class="mt-6 bg-cardbg border-l-4 border-blue-500 p-4 rounded border border-bordercol hidden">
-            <h3 class="font-semibold text-blue-600 mb-2">📊 Key Insights:</h3>
+            <h3 class="font-semibold text-blue-500 mb-2">📊 Key Insights:</h3>
             <ul class="text-sm text-textmain space-y-1" id="insightsList"></ul>
         </div>
     </div>
@@ -357,7 +367,11 @@
                 priorityCounts[r['Priority'] || 'Not Set'] = (priorityCounts[r['Priority'] || 'Not Set'] || 0) + 1;
             });
             
-            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: getComputedStyle(document.body).getPropertyValue('--text-main') } } } };
+            // Get dynamic colors from CSS variables
+            const textColor = getComputedStyle(document.body).getPropertyValue('--text-main').trim();
+            const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-muted').trim();
+            
+            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: textColor } } } };
             
             if (statusChartInstance) statusChartInstance.destroy();
             statusChartInstance = new Chart(document.getElementById('statusChart').getContext('2d'), {
@@ -370,7 +384,7 @@
             typeChartInstance = new Chart(document.getElementById('typeChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#667eea' }] },
-                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 }, color: getComputedStyle(document.body).getPropertyValue('--text-muted') } }, y: { beginAtZero: true, ticks: { font: { size: 8 }, color: getComputedStyle(document.body).getPropertyValue('--text-muted') } } } }
+                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 }, color: mutedColor } }, y: { beginAtZero: true, ticks: { font: { size: 8 }, color: mutedColor } } } }
             });
 
             if (priorityChartInstance) priorityChartInstance.destroy();
@@ -394,7 +408,7 @@
             if (overdue > 0) insights.push(`🚨 ${overdue} tasks are overdue and need immediate attention`);
             
             const completionRate = total > 0 ? (completed / total) * 100 : 0;
-            if (completionRate < 40) insights.push(`📉 Low completion rate (${Math.round(completionRate)}%) - review priorities`);
+            if (completionRate < 40) insights.push(` Low completion rate (${Math.round(completionRate)}%) - review priorities`);
             if (going > 10) insights.push(`🔄 ${going} tasks in progress - monitor capacity`);
             
             document.getElementById('insightsList').innerHTML = insights.map(i => `<li>${i}</li>`).join('');

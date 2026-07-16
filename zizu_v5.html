@@ -30,11 +30,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- THEME VARIABLES --- */
+        /* --- THEME VARIABLES (Fixed Text Colors) --- */
         :root {
             --main-bg: #f9fafb;
             --card-bg: #ffffff;
-            --text-main: #1f2937;
+            --text-main: #1f2937; /* Neutral dark gray */
             --text-muted: #6b7280;
             --border-col: #e5e7eb;
             --header-bg: #f3f4f6;
@@ -42,40 +42,35 @@
         [data-theme="dark"] {
             --main-bg: #0f172a;
             --card-bg: #1e293b;
-            --text-main: #f1f5f9;
+            --text-main: #f1f5f9; /* Light gray for dark mode */
             --text-muted: #94a3b8;
             --border-col: #334155;
             --header-bg: #1e293b;
         }
         [data-theme="ocean"] {
-            --main-bg: #eff6ff;
+            --main-bg: #f0f9ff; /* Light blue background */
             --card-bg: #ffffff;
-            --text-main: #1e3a8a;
-            --text-muted: #64748b;
-            --border-col: #bfdbfe;
-            --header-bg: #dbeafe;
+            --text-main: #0f172a; /* Neutral dark text (NOT blue) */
+            --text-muted: #475569;
+            --border-col: #bae6fd;
+            --header-bg: #e0f2fe;
         }
         [data-theme="forest"] {
-            --main-bg: #f0fdf4;
+            --main-bg: #f0fdf4; /* Light green background */
             --card-bg: #ffffff;
-            --text-main: #14532d;
-            --text-muted: #4b5563;
-            --border-col: #bbf7d0;
-            --header-bg: #dcfce7;
+            --text-main: #0f172a; /* Neutral dark text (NOT green) */
+            --text-muted: #475569;
+            --border-col: #a7f3d0;
+            --header-bg: #d1fae5;
         }
 
         /* --- UI STYLES --- */
         body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         
-        /* Force text colors to use theme variables globally to prevent dark-on-dark bugs */
-        h1, h2, h3, p, span, label, th, td { color: var(--text-main); }
-        .text-muted-override { color: var(--text-muted) !important; }
-        
         .editable-cell { cursor: pointer; transition: all 0.2s; }
         .editable-cell:hover { background-color: var(--header-bg); outline: 2px dashed #3b82f6; outline-offset: -2px; }
         .smart-input { width: 100%; min-width: 120px; padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 4px; font-size: 0.875rem; outline: none; background: var(--card-bg); color: var(--text-main); }
         
-        /* Fix placeholders and dropdown arrows in dark mode */
         ::placeholder { color: var(--text-muted) !important; opacity: 1; }
         select option { background-color: var(--card-bg); color: var(--text-main); }
         
@@ -106,7 +101,7 @@
                     <option value="light">☀️ Light</option>
                     <option value="dark">🌙 Dark</option>
                     <option value="ocean">🌊 Ocean</option>
-                    <option value="forest">🌲 Forest</option>
+                    <option value="forest"> Forest</option>
                 </select>
 
                 <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
@@ -162,7 +157,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-blue-500 border border-bordercol">
                 <p class="text-sm text-textmuted">Total Tasks</p>
-                <p id="metricTotal" class="text-2xl font-bold text-textmain">0</p>
+                <p id="metricTotal" class="text-2xl font-bold">0</p>
             </div>
             <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 border border-bordercol">
                 <p class="text-sm text-textmuted">Going</p>
@@ -180,7 +175,7 @@
 
         <!-- Filters -->
         <div class="bg-cardbg p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-bordercol">
-            <input type="text" id="searchInput" placeholder="🔍 Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="searchInput" placeholder=" Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
             <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="">All Statuses</option>
             </select>
@@ -367,7 +362,6 @@
                 priorityCounts[r['Priority'] || 'Not Set'] = (priorityCounts[r['Priority'] || 'Not Set'] || 0) + 1;
             });
             
-            // Get dynamic colors from CSS variables
             const textColor = getComputedStyle(document.body).getPropertyValue('--text-main').trim();
             const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-muted').trim();
             
@@ -529,7 +523,9 @@
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
 
                 getDisplayHeaders().forEach(h => {
-                    const td = document.createElement('td'); td.className = 'px-4 py-3 text-sm text-textmain editable-cell';
+                    const td = document.createElement('td'); 
+                    // REMOVED text-textmain from td so status colors can work perfectly
+                    td.className = 'px-4 py-3 text-sm editable-cell'; 
                     let val = row[h];
                     if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString();
                     else td.textContent = val || '';

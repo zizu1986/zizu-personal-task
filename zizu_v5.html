@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>ENG Task Dashboard</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,61 +12,33 @@
             theme: {
                 extend: {
                     colors: {
-                        mainbg: 'var(--main-bg)',
-                        cardbg: 'var(--card-bg)',
-                        textmain: 'var(--text-main)',
-                        textmuted: 'var(--text-muted)',
-                        bordercol: 'var(--border-col)',
-                        headerbg: 'var(--header-bg)',
+                        mainbg: 'var(--main-bg)', cardbg: 'var(--card-bg)', textmain: 'var(--text-main)',
+                        textmuted: 'var(--text-muted)', bordercol: 'var(--border-col)', headerbg: 'var(--header-bg)',
                     }
                 }
             }
         }
     </script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- THEME VARIABLES (White for Dark, Black for others) --- */
-        :root {
-            --main-bg: #f9fafb;
-            --card-bg: #ffffff;
-            --text-main: #000000; /* Pure Black */
-            --text-muted: #4b5563;
-            --border-col: #e5e7eb;
-            --header-bg: #f3f4f6;
-        }
-        [data-theme="dark"] {
-            --main-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #ffffff; /* Pure White */
-            --text-muted: #d1d5db;
-            --border-col: #334155;
-            --header-bg: #1e293b;
-        }
-        [data-theme="ocean"] {
-            --main-bg: #f0f9ff;
-            --card-bg: #ffffff;
-            --text-main: #000000; /* Pure Black */
-            --text-muted: #4b5563;
-            --border-col: #bae6fd;
-            --header-bg: #e0f2fe;
-        }
-        [data-theme="forest"] {
-            --main-bg: #f0fdf4;
-            --card-bg: #ffffff;
-            --text-main: #000000; /* Pure Black */
-            --text-muted: #4b5563;
-            --border-col: #a7f3d0;
-            --header-bg: #d1fae5;
-        }
+        :root { --main-bg: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-muted: #4b5563; --border-col: #e5e7eb; --header-bg: #f3f4f6; }
+        [data-theme="dark"] { --main-bg: #0f172a; --card-bg: #1e293b; --text-main: #ffffff; --text-muted: #d1d5db; --border-col: #334155; --header-bg: #1e293b; }
+        [data-theme="ocean"] { --main-bg: #f0f9ff; --card-bg: #ffffff; --text-main: #000000; --text-muted: #4b5563; --border-col: #bae6fd; --header-bg: #e0f2fe; }
+        [data-theme="forest"] { --main-bg: #f0fdf4; --card-bg: #ffffff; --text-main: #000000; --text-muted: #4b5563; --border-col: #a7f3d0; --header-bg: #d1fae5; }
 
-        /* --- UI STYLES --- */
-        body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; font-size: 16px; } /* BASE FONT INCREASED */
+        
+        /* TABLE FIXES: Allow wrapping and increase text size */
+        td, th { white-space: normal; vertical-align: top; line-height: 1.4; } 
+        .task-cell { min-width: 220px; max-width: 300px; }
+        .remark-cell { min-width: 180px; max-width: 250px; }
+        .date-cell { min-width: 110px; }
+        .status-cell { min-width: 120px; }
         
         .editable-cell { cursor: pointer; transition: all 0.2s; }
         .editable-cell:hover { background-color: var(--header-bg); outline: 2px dashed #3b82f6; outline-offset: -2px; }
-        .smart-input { width: 100%; min-width: 120px; padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 4px; font-size: 0.875rem; outline: none; background: var(--card-bg); color: var(--text-main); }
+        .smart-input { width: 100%; min-width: 100px; padding: 6px 10px; border: 2px solid #3b82f6; border-radius: 4px; font-size: 1rem; outline: none; background: var(--card-bg); color: var(--text-main); }
         
         ::placeholder { color: var(--text-muted) !important; opacity: 1; }
         select option { background-color: var(--card-bg); color: var(--text-main); }
@@ -77,7 +47,6 @@
         .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 50; }
         .toast.show { transform: translateY(0); opacity: 1; }
-        td, th { white-space: nowrap; }
         .sort-header { cursor: pointer; user-select: none; }
         .sort-header:hover { background-color: var(--header-bg); }
         .sort-icon::after { content: ' '; font-size: 0.8em; opacity: 0.5; }
@@ -87,7 +56,7 @@
 </head>
 <body class="font-sans">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-full">
+    <div class="container mx-auto p-4 md:p-6 max-w-[98vw]"> <!-- Wider container -->
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
@@ -96,184 +65,122 @@
             </div>
             <div class="flex flex-wrap gap-3">
                 <select id="themeSelector" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-                    <option value="light">️ Light</option>
-                    <option value="dark">🌙 Dark</option>
-                    <option value="ocean">🌊 Ocean</option>
-                    <option value="forest">🌲 Forest</option>
+                    <option value="light">☀️ Light</option><option value="dark">🌙 Dark</option><option value="ocean"> Ocean</option><option value="forest"> Forest</option>
                 </select>
-
                 <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
-                     Upload Excel
-                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden">
+                     Upload Excel <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden">
                 </label>
+                <button id="toggleColumnsBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">👁️ Show All Columns</button>
                 <button id="addTaskBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">➕ Add Task</button>
-                <button id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden"> Export</button>
+                <button id="exportBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition hidden">💾 Export</button>
             </div>
         </div>
 
         <!-- Summary Analysis Cards -->
         <div id="analysisSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 hidden">
             <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-xl shadow-lg">
-                <h3 class="text-sm font-medium opacity-90">Completion Rate</h3>
-                <p class="text-3xl font-bold mt-1" id="completionRate">0%</p>
-                <p class="text-xs mt-2 opacity-75" id="completedTasks">0 of 0 tasks</p>
+                <h3 class="text-sm font-medium opacity-90">Completion Rate</h3><p class="text-3xl font-bold mt-1" id="completionRate">0%</p><p class="text-xs mt-2 opacity-75" id="completedTasks">0 of 0 tasks</p>
             </div>
             <div class="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-4 rounded-xl shadow-lg">
-                <h3 class="text-sm font-medium opacity-90">In Progress</h3>
-                <p class="text-3xl font-bold mt-1" id="inProgressCount">0</p>
-                <p class="text-xs mt-2 opacity-75">Active tasks</p>
+                <h3 class="text-sm font-medium opacity-90">In Progress</h3><p class="text-3xl font-bold mt-1" id="inProgressCount">0</p><p class="text-xs mt-2 opacity-75">Active tasks</p>
             </div>
             <div class="bg-gradient-to-br from-red-500 to-pink-600 text-white p-4 rounded-xl shadow-lg">
-                <h3 class="text-sm font-medium opacity-90">Postponed</h3>
-                <p class="text-3xl font-bold mt-1" id="postponedCount">0</p>
-                <p class="text-xs mt-2 opacity-75" id="postponeRate">0% of total</p>
+                <h3 class="text-sm font-medium opacity-90">Postponed</h3><p class="text-3xl font-bold mt-1" id="postponedCount">0</p><p class="text-xs mt-2 opacity-75" id="postponeRate">0% of total</p>
             </div>
             <div class="bg-gradient-to-br from-green-500 to-teal-600 text-white p-4 rounded-xl shadow-lg">
-                <h3 class="text-sm font-medium opacity-90">Top Assignee</h3>
-                <p class="text-2xl font-bold mt-1" id="topAssignee">-</p>
-                <p class="text-xs mt-2 opacity-75" id="topAssigneeCount">0 tasks</p>
+                <h3 class="text-sm font-medium opacity-90">Top Assignee</h3><p class="text-2xl font-bold mt-1" id="topAssignee">-</p><p class="text-xs mt-2 opacity-75" id="topAssigneeCount">0 tasks</p>
             </div>
         </div>
 
         <!-- Charts Section -->
         <div id="chartsSection" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 hidden">
-            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol">
-                <h3 class="font-semibold mb-2 text-sm text-textmain">Task Status</h3>
-                <div style="height: 150px;"><canvas id="statusChart"></canvas></div>
-            </div>
-            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol">
-                <h3 class="font-semibold mb-2 text-sm text-textmain">Task Type</h3>
-                <div style="height: 150px;"><canvas id="typeChart"></canvas></div>
-            </div>
-            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol">
-                <h3 class="font-semibold mb-2 text-sm text-textmain">Priority</h3>
-                <div style="height: 150px;"><canvas id="priorityChart"></canvas></div>
-            </div>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Task Status</h3><div style="height: 150px;"><canvas id="statusChart"></canvas></div></div>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Task Type</h3><div style="height: 150px;"><canvas id="typeChart"></canvas></div></div>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Priority</h3><div style="height: 150px;"><canvas id="priorityChart"></canvas></div></div>
         </div>
 
         <!-- Metrics -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-blue-500 border border-bordercol">
-                <p class="text-sm text-textmuted">Total Tasks</p>
-                <p id="metricTotal" class="text-2xl font-bold">0</p>
-            </div>
-            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 border border-bordercol">
-                <p class="text-sm text-textmuted">Going</p>
-                <p id="metricGoing" class="text-2xl font-bold text-yellow-600">0</p>
-            </div>
-            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-green-500 border border-bordercol">
-                <p class="text-sm text-textmuted">Completed</p>
-                <p id="metricDone" class="text-2xl font-bold text-green-600">0</p>
-            </div>
-            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-red-500 border border-bordercol">
-                <p class="text-sm text-textmuted">🚨 Overdue</p>
-                <p id="metricOverdue" class="text-2xl font-bold text-red-600">0</p>
-            </div>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-blue-500 border border-bordercol"><p class="text-sm text-textmuted">Total Tasks</p><p id="metricTotal" class="text-2xl font-bold">0</p></div>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 border border-bordercol"><p class="text-sm text-textmuted">Going</p><p id="metricGoing" class="text-2xl font-bold text-yellow-600">0</p></div>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-green-500 border border-bordercol"><p class="text-sm text-textmuted">Completed</p><p id="metricDone" class="text-2xl font-bold text-green-600">0</p></div>
+            <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-red-500 border border-bordercol"><p class="text-sm text-textmuted">🚨 Overdue</p><p id="metricOverdue" class="text-2xl font-bold text-red-600">0</p></div>
         </div>
 
         <!-- Filters -->
         <div class="bg-cardbg p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-bordercol">
             <input type="text" id="searchInput" placeholder="🔍 Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
-            <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="">All Statuses</option>
-            </select>
-            <select id="filterAssignee" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="">All Assignees</option>
-            </select>
+            <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"><option value="">All Statuses</option></select>
+            <select id="filterAssignee" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"><option value="">All Assignees</option></select>
         </div>
 
         <!-- Data Table -->
         <div class="bg-cardbg rounded-xl shadow-sm overflow-hidden border border-bordercol">
             <div class="overflow-x-auto scrollbar-thin max-h-[65vh]">
                 <table class="min-w-full divide-y divide-bordercol" id="dataTable">
-                    <thead class="bg-headerbg sticky top-0 z-10">
-                        <tr id="tableHeader"></tr>
-                    </thead>
+                    <thead class="bg-headerbg sticky top-0 z-10"><tr id="tableHeader"></tr></thead>
                     <tbody id="tableBody" class="bg-cardbg divide-y divide-bordercol"></tbody>
                 </table>
             </div>
         </div>
         
         <div id="insightsSection" class="mt-6 bg-cardbg border-l-4 border-blue-500 p-4 rounded border border-bordercol hidden">
-            <h3 class="font-semibold text-blue-500 mb-2"> Key Insights:</h3>
-            <ul class="text-sm text-textmain space-y-1" id="insightsList"></ul>
+            <h3 class="font-semibold text-blue-500 mb-2">📊 Key Insights:</h3><ul class="text-base text-textmain space-y-1" id="insightsList"></ul>
         </div>
     </div>
 
     <div id="toast" class="toast">Changes saved!</div>
 
     <script>
-        let rawData = [];
-        let headers = [];
-        let sortColumn = null;
-        let sortDirection = 'asc';
+        let rawData = [], headers = [], sortColumn = null, sortDirection = 'asc';
+        let showAllColumns = false; // NEW: Toggle for column visibility
         let statusChartInstance = null, typeChartInstance = null, priorityChartInstance = null;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
 
         // --- THEME LOGIC ---
         const themeSelector = document.getElementById('themeSelector');
         const savedTheme = localStorage.getItem('dashboard_theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeSelector.value = savedTheme;
+        document.documentElement.setAttribute('data-theme', savedTheme); themeSelector.value = savedTheme;
+        themeSelector.addEventListener('change', (e) => { document.documentElement.setAttribute('data-theme', e.target.value); localStorage.setItem('dashboard_theme', e.target.value); showToast(`Theme changed to ${e.target.value}!`); });
 
-        themeSelector.addEventListener('change', (e) => {
-            const theme = e.target.value;
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('dashboard_theme', theme);
-            showToast(`Theme changed to ${theme}!`);
+        // --- COLUMN TOGGLE LOGIC ---
+        document.getElementById('toggleColumnsBtn').addEventListener('click', () => {
+            showAllColumns = !showAllColumns;
+            document.getElementById('toggleColumnsBtn').textContent = showAllColumns ? '🙈 Hide Extra Columns' : '👁️ Show All Columns';
+            renderHeaders(); renderTable();
         });
 
-        function showToast(msg = "Changes saved!") {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        function formatDateForInput(dateVal) {
-            if (!dateVal) return '';
-            let d = new Date(dateVal);
-            if (isNaN(d)) return '';
-            return d.toISOString().split('T')[0];
-        }
+        function showToast(msg = "Changes saved!") { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+        function formatDateForInput(dateVal) { if (!dateVal) return ''; let d = new Date(dateVal); if (isNaN(d)) return ''; return d.toISOString().split('T')[0]; }
 
         function getDisplayHeaders() {
-            const priorityHeaders = ['Task', 'Task status', 'Assignee', 'Start Date', 'Due Date', 'Priority', 'Type', 'Remark'];
-            let result = priorityHeaders.filter(h => headers.includes(h));
-            headers.forEach(h => { if (!result.includes(h) && h.trim() !== '') result.push(h); });
+            // Core columns always shown, extra columns shown only if toggled
+            const coreHeaders = ['Task', 'Task status', 'Assignee', 'Start Date', 'Due Date', 'Priority', 'Type', 'Remark'];
+            const extraHeaders = ['Dependency', 'Type of task', 'Checker', 'Duration', 'Completed At', 'Predecessors'];
+            
+            let result = coreHeaders.filter(h => headers.includes(h));
+            if (showAllColumns) {
+                extraHeaders.forEach(h => { if (headers.includes(h) && !result.includes(h)) result.push(h); });
+                headers.forEach(h => { if (!result.includes(h) && h.trim() !== '') result.push(h); });
+            }
             return result;
         }
 
         function sortData(column) {
-            if (sortColumn === column) { sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; } 
-            else { sortColumn = column; sortDirection = 'asc'; }
+            if (sortColumn === column) { sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; } else { sortColumn = column; sortDirection = 'asc'; }
             rawData.sort((a, b) => {
                 let valA = a[column] || '', valB = b[column] || '';
-                if (column.includes('Date')) {
-                    valA = valA instanceof Date ? valA : new Date(valA);
-                    valB = valB instanceof Date ? valB : new Date(valB);
-                    if (isNaN(valA)) valA = new Date('01/01/1900');
-                    if (isNaN(valB)) valB = new Date('01/01/1900');
-                } else { valA = valA.toString().toLowerCase(); valB = valB.toString().toLowerCase(); }
-                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
+                if (column.includes('Date')) { valA = valA instanceof Date ? valA : new Date(valA); valB = valB instanceof Date ? valB : new Date(valB); if (isNaN(valA)) valA = new Date('01/01/1900'); if (isNaN(valB)) valB = new Date('01/01/1900'); } 
+                else { valA = valA.toString().toLowerCase(); valB = valB.toString().toLowerCase(); }
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1; if (valA > valB) return sortDirection === 'asc' ? 1 : -1; return 0;
             });
             renderTable(); updateSortIcons();
         }
 
-        function updateSortIcons() {
-            document.querySelectorAll('.sort-header').forEach(th => {
-                th.classList.remove('sort-asc', 'sort-desc');
-                if (th.dataset.column === sortColumn) th.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-            });
-        }
+        function updateSortIcons() { document.querySelectorAll('.sort-header').forEach(th => { th.classList.remove('sort-asc', 'sort-desc'); if (th.dataset.column === sortColumn) th.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc'); }); }
 
-        // File Upload
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -282,44 +189,19 @@
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     worksheet['!ref'] = 'A1:Z1000'; 
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "", blankrows: false });
-
                     let headerRowIndex = 0;
-                    for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
-                        if (jsonData[i] && jsonData[i].some(cell => cell && cell.toString().toLowerCase().includes('task'))) {
-                            headerRowIndex = i; break;
-                        }
-                    }
-                    
+                    for (let i = 0; i < Math.min(jsonData.length, 20); i++) { if (jsonData[i] && jsonData[i].some(cell => cell && cell.toString().toLowerCase().includes('task'))) { headerRowIndex = i; break; } }
                     headers = jsonData[headerRowIndex].map(h => h ? h.toString().trim() : "");
                     rawData = [];
-                    
                     for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
-                        const row = jsonData[i];
-                        if (!row) continue;
+                        const row = jsonData[i]; if (!row) continue;
                         const hasContent = row.some(cell => cell !== undefined && cell !== null && cell.toString().trim() !== "");
-                        if (hasContent) {
-                            let obj = {};
-                            headers.forEach((h, idx) => { obj[h] = row[idx] !== undefined ? row[idx] : ""; });
-                            rawData.push(obj);
-                        }
+                        if (hasContent) { let obj = {}; headers.forEach((h, idx) => { obj[h] = row[idx] !== undefined ? row[idx] : ""; }); rawData.push(obj); }
                     }
-
-                    const seen = new Set();
-                    rawData = rawData.filter(row => {
-                        const key = (row['Task'] || '') + '|' + (row['Task status'] || '');
-                        if (seen.has(key)) return false;
-                        seen.add(key); return true;
-                    });
-
-                    saveToLocalStorage();
-                    initDashboard();
-                    generateAnalysis();
-                    document.getElementById('statusText').textContent = `✅ Loaded ${rawData.length} tasks`;
-                    showToast(`Loaded ${rawData.length} tasks`);
-                } catch (error) {
-                    console.error('Error:', error);
-                    showToast('Error: ' + error.message);
-                }
+                    const seen = new Set(); rawData = rawData.filter(row => { const key = (row['Task'] || '') + '|' + (row['Task status'] || ''); if (seen.has(key)) return false; seen.add(key); return true; });
+                    saveToLocalStorage(); initDashboard(); generateAnalysis();
+                    document.getElementById('statusText').textContent = `✅ Loaded ${rawData.length} tasks`; showToast(`Loaded ${rawData.length} tasks`);
+                } catch (error) { console.error('Error:', error); showToast('Error: ' + error.message); }
             };
             reader.readAsArrayBuffer(file);
         });
@@ -329,276 +211,114 @@
             const completed = rawData.filter(r => ['done', 'on time done'].includes((r['Task status'] || '').toLowerCase())).length;
             const going = rawData.filter(r => (r['Task status'] || '').toLowerCase() === 'going').length;
             const postponed = rawData.filter(r => (r['Task status'] || '').toLowerCase() === 'postpone').length;
-            
             document.getElementById('completionRate').textContent = total > 0 ? Math.round((completed / total) * 100) + '%' : '0%';
             document.getElementById('completedTasks').textContent = `${completed} of ${total} tasks`;
             document.getElementById('inProgressCount').textContent = going;
             document.getElementById('postponedCount').textContent = postponed;
             document.getElementById('postponeRate').textContent = total > 0 ? Math.round((postponed / total) * 100) + '% of total' : '0%';
-            
-            const assigneeCount = {};
-            rawData.forEach(r => { const a = r['Assignee'] || 'Unassigned'; assigneeCount[a] = (assigneeCount[a] || 0) + 1; });
+            const assigneeCount = {}; rawData.forEach(r => { const a = r['Assignee'] || 'Unassigned'; assigneeCount[a] = (assigneeCount[a] || 0) + 1; });
             const topAssignee = Object.entries(assigneeCount).sort((a, b) => b[1] - a[1])[0];
-            if (topAssignee) {
-                document.getElementById('topAssignee').textContent = topAssignee[0];
-                document.getElementById('topAssigneeCount').textContent = topAssignee[1] + ' tasks';
-            }
-            
-            createCharts();
-            generateInsights(total, completed, going, postponed);
-            
-            document.getElementById('analysisSection').classList.remove('hidden');
-            document.getElementById('chartsSection').classList.remove('hidden');
-            document.getElementById('insightsSection').classList.remove('hidden');
+            if (topAssignee) { document.getElementById('topAssignee').textContent = topAssignee[0]; document.getElementById('topAssigneeCount').textContent = topAssignee[1] + ' tasks'; }
+            createCharts(); generateInsights(total, completed, going, postponed);
+            document.getElementById('analysisSection').classList.remove('hidden'); document.getElementById('chartsSection').classList.remove('hidden'); document.getElementById('insightsSection').classList.remove('hidden');
         }
 
         function createCharts() {
             const statusCounts = {}, typeCounts = {}, priorityCounts = {};
-            rawData.forEach(r => {
-                statusCounts[r['Task status'] || 'Not Set'] = (statusCounts[r['Task status'] || 'Not Set'] || 0) + 1;
-                typeCounts[r['Type'] || 'Not Set'] = (typeCounts[r['Type'] || 'Not Set'] || 0) + 1;
-                priorityCounts[r['Priority'] || 'Not Set'] = (priorityCounts[r['Priority'] || 'Not Set'] || 0) + 1;
-            });
-            
-            const textColor = getComputedStyle(document.body).getPropertyValue('--text-main').trim();
-            const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-muted').trim();
-            
-            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 }, color: textColor } } } };
-            
-            if (statusChartInstance) statusChartInstance.destroy();
-            statusChartInstance = new Chart(document.getElementById('statusChart').getContext('2d'), {
-                type: 'doughnut',
-                data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'] }] },
-                options: commonOptions
-            });
-            
-            if (typeChartInstance) typeChartInstance.destroy();
-            typeChartInstance = new Chart(document.getElementById('typeChart').getContext('2d'), {
-                type: 'bar',
-                data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#667eea' }] },
-                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 8 }, color: mutedColor } }, y: { beginAtZero: true, ticks: { font: { size: 8 }, color: mutedColor } } } }
-            });
-
-            if (priorityChartInstance) priorityChartInstance.destroy();
-            priorityChartInstance = new Chart(document.getElementById('priorityChart').getContext('2d'), {
-                type: 'pie',
-                data: { labels: Object.keys(priorityCounts), datasets: [{ data: Object.values(priorityCounts), backgroundColor: ['#fbbf24', '#10b981', '#ef4444', '#6b7280'] }] },
-                options: commonOptions
-            });
+            rawData.forEach(r => { statusCounts[r['Task status'] || 'Not Set'] = (statusCounts[r['Task status'] || 'Not Set'] || 0) + 1; typeCounts[r['Type'] || 'Not Set'] = (typeCounts[r['Type'] || 'Not Set'] || 0) + 1; priorityCounts[r['Priority'] || 'Not Set'] = (priorityCounts[r['Priority'] || 'Not Set'] || 0) + 1; });
+            const textColor = getComputedStyle(document.body).getPropertyValue('--text-main').trim(); const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-muted').trim();
+            const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, color: textColor } } } };
+            if (statusChartInstance) statusChartInstance.destroy(); statusChartInstance = new Chart(document.getElementById('statusChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'] }] }, options: commonOptions });
+            if (typeChartInstance) typeChartInstance.destroy(); typeChartInstance = new Chart(document.getElementById('typeChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#667eea' }] }, options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 9 }, color: mutedColor } }, y: { beginAtZero: true, ticks: { font: { size: 9 }, color: mutedColor } } } } });
+            if (priorityChartInstance) priorityChartInstance.destroy(); priorityChartInstance = new Chart(document.getElementById('priorityChart').getContext('2d'), { type: 'pie', data: { labels: Object.keys(priorityCounts), datasets: [{ data: Object.values(priorityCounts), backgroundColor: ['#fbbf24', '#10b981', '#ef4444', '#6b7280'] }] }, options: commonOptions });
         }
 
         function generateInsights(total, completed, going, postponed) {
             const insights = [];
             const postponeRate = total > 0 ? (postponed / total) * 100 : 0;
-            if (postponeRate > 30) insights.push(`⚠️ High postponement rate (${Math.round(postponeRate)}%) - review resource allocation`);
-            
-            const overdue = rawData.filter(r => {
-                if (!r['Due Date']) return false;
-                const dueDate = r['Due Date'] instanceof Date ? r['Due Date'] : new Date(r['Due Date']);
-                return dueDate < today && !['done', 'on time done'].includes((r['Task status'] || '').toLowerCase());
-            }).length;
+            if (postponeRate > 30) insights.push(`️ High postponement rate (${Math.round(postponeRate)}%) - review resource allocation`);
+            const overdue = rawData.filter(r => { if (!r['Due Date']) return false; const dueDate = r['Due Date'] instanceof Date ? r['Due Date'] : new Date(r['Due Date']); return dueDate < today && !['done', 'on time done'].includes((r['Task status'] || '').toLowerCase()); }).length;
             if (overdue > 0) insights.push(`🚨 ${overdue} tasks are overdue and need immediate attention`);
-            
             const completionRate = total > 0 ? (completed / total) * 100 : 0;
-            if (completionRate < 40) insights.push(`📉 Low completion rate (${Math.round(completionRate)}%) - review priorities`);
+            if (completionRate < 40) insights.push(` Low completion rate (${Math.round(completionRate)}%) - review priorities`);
             if (going > 10) insights.push(`🔄 ${going} tasks in progress - monitor capacity`);
-            
             document.getElementById('insightsList').innerHTML = insights.map(i => `<li>${i}</li>`).join('');
         }
 
         function initDashboard() {
             if (rawData.length === 0) return;
-            document.getElementById('exportBtn').classList.remove('hidden');
-            document.getElementById('addTaskBtn').classList.remove('hidden');
+            document.getElementById('exportBtn').classList.remove('hidden'); document.getElementById('addTaskBtn').classList.remove('hidden'); document.getElementById('toggleColumnsBtn').classList.remove('hidden');
             renderHeaders(); populateFilters(); renderTable(); updateMetrics();
         }
 
         function renderHeaders() {
             const headerRow = document.getElementById('tableHeader');
-            headerRow.innerHTML = '<th class="px-4 py-3 text-left text-xs font-medium text-textmuted uppercase tracking-wider">Actions</th>';
+            headerRow.innerHTML = '<th class="px-3 py-3 text-left text-base font-medium text-textmuted uppercase tracking-wider w-[50px]">Actions</th>'; // Increased font size to text-base
             getDisplayHeaders().forEach(h => {
                 const th = document.createElement('th');
-                th.className = 'px-4 py-3 text-left text-xs font-medium text-textmuted uppercase tracking-wider sort-header sort-icon';
+                th.className = 'px-3 py-3 text-left text-base font-medium text-textmuted uppercase tracking-wider sort-header sort-icon'; // Increased font size
                 th.textContent = h; th.dataset.column = h; th.onclick = () => sortData(h);
+                
+                // Apply specific width classes for better fitting
+                if (h === 'Task') th.classList.add('task-cell');
+                else if (h === 'Remark') th.classList.add('remark-cell');
+                else if (h.includes('Date')) th.classList.add('date-cell');
+                else if (h === 'Task status' || h === 'Priority') th.classList.add('status-cell');
+                
                 headerRow.appendChild(th);
             });
         }
 
         function makeEditable(cell, rowIndex, colName, currentValue) {
-            cell.innerHTML = '';
-            let input;
-
+            cell.innerHTML = ''; let input;
             if (['Task status', 'Priority', 'Type', 'Type of task', 'Checker', 'Dependency'].includes(colName)) {
-                input = document.createElement('select'); 
-                input.className = 'smart-input';
-                let options = [...new Set(rawData.map(r => r[colName]).filter(v => v))]; 
-                options.unshift(''); 
-                options.forEach(opt => {
-                    const option = document.createElement('option'); 
-                    option.value = opt; 
-                    option.textContent = opt || '(Blank)';
-                    if (opt === currentValue) option.selected = true; 
-                    input.appendChild(option);
-                });
+                input = document.createElement('select'); input.className = 'smart-input';
+                let options = [...new Set(rawData.map(r => r[colName]).filter(v => v))]; options.unshift(''); 
+                options.forEach(opt => { const option = document.createElement('option'); option.value = opt; option.textContent = opt || '(Blank)'; if (opt === currentValue) option.selected = true; input.appendChild(option); });
             } else if (colName === 'Assignee') {
-                input = document.createElement('input'); 
-                input.type = 'text'; 
-                input.className = 'smart-input'; 
-                input.value = currentValue || '';
-                input.setAttribute('list', 'assignee-datalist');
-                
-                let datalist = document.getElementById('assignee-datalist');
-                if (!datalist) {
-                    datalist = document.createElement('datalist');
-                    datalist.id = 'assignee-datalist';
-                    document.body.appendChild(datalist);
-                }
-                datalist.innerHTML = '';
-                let assignees = [...new Set(rawData.map(r => r['Assignee']).filter(v => v))];
-                assignees.forEach(a => {
-                    const option = document.createElement('option');
-                    option.value = a;
-                    datalist.appendChild(option);
-                });
-            } else if (colName.includes('Date')) {
-                input = document.createElement('input'); 
-                input.type = 'date'; 
-                input.className = 'smart-input'; 
-                input.value = formatDateForInput(currentValue);
-            } else {
-                input = document.createElement('input'); 
-                input.type = 'text'; 
-                input.className = 'smart-input'; 
-                input.value = currentValue || '';
-            }
-            
-            cell.appendChild(input); 
-            input.focus();
-            
-            const saveValue = () => {
-                let newVal = input.value;
-                if (colName.includes('Date') && newVal) rawData[rowIndex][colName] = new Date(newVal);
-                else rawData[rowIndex][colName] = newVal;
-                saveToLocalStorage(); 
-                renderTable(); 
-                updateMetrics(); 
-                generateAnalysis(); 
-                showToast();
-            };
-            
-            input.addEventListener('blur', saveValue);
-            input.addEventListener('keydown', (e) => { 
-                if (e.key === 'Enter') { e.preventDefault(); input.blur(); } 
-                if (e.key === 'Escape') { input.removeEventListener('blur', saveValue); renderTable(); } 
-            });
+                input = document.createElement('input'); input.type = 'text'; input.className = 'smart-input'; input.value = currentValue || ''; input.setAttribute('list', 'assignee-datalist');
+                let datalist = document.getElementById('assignee-datalist'); if (!datalist) { datalist = document.createElement('datalist'); datalist.id = 'assignee-datalist'; document.body.appendChild(datalist); }
+                datalist.innerHTML = ''; let assignees = [...new Set(rawData.map(r => r['Assignee']).filter(v => v))]; assignees.forEach(a => { const option = document.createElement('option'); option.value = a; datalist.appendChild(option); });
+            } else if (colName.includes('Date')) { input = document.createElement('input'); input.type = 'date'; input.className = 'smart-input'; input.value = formatDateForInput(currentValue); } 
+            else { input = document.createElement('input'); input.type = 'text'; input.className = 'smart-input'; input.value = currentValue || ''; }
+            cell.appendChild(input); input.focus();
+            const saveValue = () => { let newVal = input.value; if (colName.includes('Date') && newVal) rawData[rowIndex][colName] = new Date(newVal); else rawData[rowIndex][colName] = newVal; saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast(); };
+            input.addEventListener('blur', saveValue); input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); input.blur(); } if (e.key === 'Escape') { input.removeEventListener('blur', saveValue); renderTable(); } });
         }
 
         function renderTable() {
             const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const fStatus = document.getElementById('filterStatus').value;
-            const fAssignee = document.getElementById('filterAssignee').value;
-
+            const search = document.getElementById('searchInput').value.toLowerCase(); const fStatus = document.getElementById('filterStatus').value; const fAssignee = document.getElementById('filterAssignee').value;
             rawData.forEach((row, rowIndex) => {
-                const status = (row['Task status'] || '').toString().toLowerCase();
-                const assignee = (row['Assignee'] || '').toString();
-                const task = (row['Task'] || '').toString().toLowerCase();
-                const remark = (row['Remark'] || '').toString().toLowerCase();
-
-                if (fStatus && status !== fStatus.toLowerCase()) return;
-                if (fAssignee && assignee !== fAssignee) return;
-                if (search && !task.includes(search) && !remark.includes(search)) return;
-
+                const status = (row['Task status'] || '').toString().toLowerCase(); const assignee = (row['Assignee'] || '').toString(); const task = (row['Task'] || '').toString().toLowerCase(); const remark = (row['Remark'] || '').toString().toLowerCase();
+                if (fStatus && status !== fStatus.toLowerCase()) return; if (fAssignee && assignee !== fAssignee) return; if (search && !task.includes(search) && !remark.includes(search)) return;
                 const tr = document.createElement('tr'); tr.className = 'hover:bg-headerbg';
-                if (row['Due Date']) {
-                    let dDate = new Date(row['Due Date']);
-                    if (!isNaN(dDate) && dDate < today && !['done', 'on time done'].includes(status)) tr.classList.add('bg-red-50');
-                }
-
-                const tdAction = document.createElement('td'); tdAction.className = 'px-4 py-3 text-sm text-center';
+                if (row['Due Date']) { let dDate = new Date(row['Due Date']); if (!isNaN(dDate) && dDate < today && !['done', 'on time done'].includes(status)) tr.classList.add('bg-red-50'); }
+                const tdAction = document.createElement('td'); tdAction.className = 'px-3 py-3 text-base text-center'; // Increased font size
                 const delBtn = document.createElement('button'); delBtn.innerHTML = '🗑️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
                 delBtn.onclick = () => { if(confirm('Delete this task?')) { rawData.splice(rowIndex, 1); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("Task deleted"); } };
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
-
                 getDisplayHeaders().forEach(h => {
                     const td = document.createElement('td'); 
-                    // No text color class here, so it inherits black/white from body, but allows status colors to override
-                    td.className = 'px-4 py-3 text-sm editable-cell'; 
-                    let val = row[h];
-                    if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString();
-                    else td.textContent = val || '';
+                    td.className = 'px-3 py-3 text-base editable-cell'; // Increased font size to text-base (16px)
+                    if (h === 'Task') td.classList.add('task-cell'); else if (h === 'Remark') td.classList.add('remark-cell');
                     
-                    if (h === 'Task status') {
-                        if (status.includes('done')) td.classList.add('text-green-600', 'font-semibold');
-                        else if (status === 'going') td.classList.add('text-blue-600', 'font-semibold');
-                        else if (status === 'postpone') td.classList.add('text-orange-500', 'font-semibold');
-                    }
-                    if (h === 'Priority') {
-                        if (val === 'Yellow') td.classList.add('text-yellow-600', 'font-bold');
-                        if (val === 'Green') td.classList.add('text-green-600', 'font-bold');
-                    }
+                    let val = row[h]; if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString(); else td.textContent = val || '';
+                    if (h === 'Task status') { if (status.includes('done')) td.classList.add('text-green-600', 'font-semibold'); else if (status === 'going') td.classList.add('text-blue-600', 'font-semibold'); else if (status === 'postpone') td.classList.add('text-orange-500', 'font-semibold'); }
+                    if (h === 'Priority') { if (val === 'Yellow') td.classList.add('text-yellow-600', 'font-bold'); if (val === 'Green') td.classList.add('text-green-600', 'font-bold'); }
                     td.onclick = () => makeEditable(td, rowIndex, h, val); tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
             });
         }
 
-        function updateMetrics() {
-            let total = rawData.length, going = 0, done = 0, overdue = 0;
-            rawData.forEach(row => {
-                const status = (row['Task status'] || '').toString().toLowerCase();
-                if (status === 'going') going++;
-                if (status.includes('done')) done++;
-                if (row['Due Date']) { let dDate = new Date(row['Due Date']); if (!isNaN(dDate) && dDate < today && !status.includes('done')) overdue++; }
-            });
-            document.getElementById('metricTotal').textContent = total;
-            document.getElementById('metricGoing').textContent = going;
-            document.getElementById('metricDone').textContent = done;
-            document.getElementById('metricOverdue').textContent = overdue;
-        }
-
-        function populateFilters() {
-            const statuses = [...new Set(rawData.map(r => r['Task status']).filter(s => s))];
-            const assignees = [...new Set(rawData.map(r => r['Assignee']).filter(a => a))];
-            const fStatus = document.getElementById('filterStatus'); fStatus.innerHTML = '<option value="">All Statuses</option>';
-            statuses.forEach(s => fStatus.add(new Option(s, s)));
-            const fAssignee = document.getElementById('filterAssignee'); fAssignee.innerHTML = '<option value="">All Assignees</option>';
-            assignees.forEach(a => fAssignee.add(new Option(a, a)));
-        }
-
-        document.getElementById('addTaskBtn').addEventListener('click', () => {
-            let newObj = {}; headers.forEach(h => newObj[h] = ""); rawData.unshift(newObj); 
-            saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("New task added!");
-        });
-
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            const exportData = rawData.map(row => {
-                let newRow = {...row};
-                headers.forEach(key => { if (key.includes('Date') && newRow[key] instanceof Date) newRow[key] = newRow[key].toLocaleDateString(); });
-                return newRow;
-            });
-            const ws = XLSX.utils.json_to_sheet(exportData, { header: headers });
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Tasks");
-            XLSX.writeFile(wb, "ENG_Tasks_Updated.xlsx"); showToast("Exported!");
-        });
-
+        function updateMetrics() { let total = rawData.length, going = 0, done = 0, overdue = 0; rawData.forEach(row => { const status = (row['Task status'] || '').toString().toLowerCase(); if (status === 'going') going++; if (status.includes('done')) done++; if (row['Due Date']) { let dDate = new Date(row['Due Date']); if (!isNaN(dDate) && dDate < today && !status.includes('done')) overdue++; } }); document.getElementById('metricTotal').textContent = total; document.getElementById('metricGoing').textContent = going; document.getElementById('metricDone').textContent = done; document.getElementById('metricOverdue').textContent = overdue; }
+        function populateFilters() { const statuses = [...new Set(rawData.map(r => r['Task status']).filter(s => s))]; const assignees = [...new Set(rawData.map(r => r['Assignee']).filter(a => a))]; const fStatus = document.getElementById('filterStatus'); fStatus.innerHTML = '<option value="">All Statuses</option>'; statuses.forEach(s => fStatus.add(new Option(s, s))); const fAssignee = document.getElementById('filterAssignee'); fAssignee.innerHTML = '<option value="">All Assignees</option>'; assignees.forEach(a => fAssignee.add(new Option(a, a))); }
+        document.getElementById('addTaskBtn').addEventListener('click', () => { let newObj = {}; headers.forEach(h => newObj[h] = ""); rawData.unshift(newObj); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("New task added!"); });
+        document.getElementById('exportBtn').addEventListener('click', function() { const exportData = rawData.map(row => { let newRow = {...row}; headers.forEach(key => { if (key.includes('Date') && newRow[key] instanceof Date) newRow[key] = newRow[key].toLocaleDateString(); }); return newRow; }); const ws = XLSX.utils.json_to_sheet(exportData, { header: headers }); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Tasks"); XLSX.writeFile(wb, "ENG_Tasks_Updated.xlsx"); showToast("Exported!"); });
         function saveToLocalStorage() { localStorage.setItem('eng_dashboard_themed_final', JSON.stringify({ headers, rawData })); }
-
-        document.getElementById('searchInput').addEventListener('input', renderTable);
-        document.getElementById('filterStatus').addEventListener('change', renderTable);
-        document.getElementById('filterAssignee').addEventListener('change', renderTable);
-
-        window.onload = function() {
-            const saved = localStorage.getItem('eng_dashboard_themed_final');
-            if (saved) {
-                const parsed = JSON.parse(saved); headers = parsed.headers;
-                rawData = parsed.rawData.map(row => {
-                    headers.forEach(key => { if (key.includes('Date') && row[key]) { let d = new Date(row[key]); if (!isNaN(d)) row[key] = d; } }); return row;
-                });
-                initDashboard(); generateAnalysis();
-                document.getElementById('statusText').textContent = `✅ Loaded ${rawData.length} tasks from cache`;
-            }
-        };
+        document.getElementById('searchInput').addEventListener('input', renderTable); document.getElementById('filterStatus').addEventListener('change', renderTable); document.getElementById('filterAssignee').addEventListener('change', renderTable);
+        window.onload = function() { const saved = localStorage.getItem('eng_dashboard_themed_final'); if (saved) { const parsed = JSON.parse(saved); headers = parsed.headers; rawData = parsed.rawData.map(row => { headers.forEach(key => { if (key.includes('Date') && row[key]) { let d = new Date(row[key]); if (!isNaN(d)) row[key] = d; } }); return row; }); initDashboard(); generateAnalysis(); document.getElementById('statusText').textContent = `✅ Loaded ${rawData.length} tasks from cache`; } };
     </script>
 </body>
 </html>

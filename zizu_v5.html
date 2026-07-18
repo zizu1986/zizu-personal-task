@@ -27,9 +27,7 @@
         [data-theme="ocean"] { --main-bg: #f0f9ff; --card-bg: #ffffff; --text-main: #000000; --text-muted: #4b5563; --border-col: #bae6fd; --header-bg: #e0f2fe; }
         [data-theme="forest"] { --main-bg: #f0fdf4; --card-bg: #ffffff; --text-main: #000000; --text-muted: #4b5563; --border-col: #a7f3d0; --header-bg: #d1fae5; }
 
-        body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; font-size: 16px; } /* BASE FONT INCREASED */
-        
-        /* TABLE FIXES: Allow wrapping and increase text size */
+        body { background-color: var(--main-bg); color: var(--text-main); transition: background-color 0.3s, color 0.3s; font-size: 16px; }
         td, th { white-space: normal; vertical-align: top; line-height: 1.4; } 
         .task-cell { min-width: 220px; max-width: 300px; }
         .remark-cell { min-width: 180px; max-width: 250px; }
@@ -56,16 +54,15 @@
 </head>
 <body class="font-sans">
 
-    <div class="container mx-auto p-4 md:p-6 max-w-[98vw]"> <!-- Wider container -->
-        <!-- Header -->
+    <div class="container mx-auto p-4 md:p-6 max-w-[98vw]">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-textmain">🛠️ Engineering Task Dashboard</h1>
+                <h1 class="text-3xl font-bold text-textmain">️ Engineering Task Dashboard</h1>
                 <p class="text-textmuted mt-1" id="statusText">Upload your Excel file to begin</p>
             </div>
             <div class="flex flex-wrap gap-3">
                 <select id="themeSelector" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-                    <option value="light">☀️ Light</option><option value="dark">🌙 Dark</option><option value="ocean"> Ocean</option><option value="forest"> Forest</option>
+                    <option value="light">☀️ Light</option><option value="dark">🌙 Dark</option><option value="ocean">🌊 Ocean</option><option value="forest">🌲 Forest</option>
                 </select>
                 <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">
                      Upload Excel <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="hidden">
@@ -76,7 +73,6 @@
             </div>
         </div>
 
-        <!-- Summary Analysis Cards -->
         <div id="analysisSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 hidden">
             <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-xl shadow-lg">
                 <h3 class="text-sm font-medium opacity-90">Completion Rate</h3><p class="text-3xl font-bold mt-1" id="completionRate">0%</p><p class="text-xs mt-2 opacity-75" id="completedTasks">0 of 0 tasks</p>
@@ -92,14 +88,13 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- Charts Section - Updated: Replaced Priority with Type of Task -->
         <div id="chartsSection" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 hidden">
             <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Task Status</h3><div style="height: 150px;"><canvas id="statusChart"></canvas></div></div>
             <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Task Type</h3><div style="height: 150px;"><canvas id="typeChart"></canvas></div></div>
-            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Priority</h3><div style="height: 150px;"><canvas id="priorityChart"></canvas></div></div>
+            <div class="bg-cardbg p-3 rounded-xl shadow-sm border border-bordercol"><h3 class="font-semibold mb-2 text-sm text-textmain">Type of Task</h3><div style="height: 150px;"><canvas id="typeTaskChart"></canvas></div></div>
         </div>
 
-        <!-- Metrics -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-blue-500 border border-bordercol"><p class="text-sm text-textmuted">Total Tasks</p><p id="metricTotal" class="text-2xl font-bold">0</p></div>
             <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 border border-bordercol"><p class="text-sm text-textmuted">Going</p><p id="metricGoing" class="text-2xl font-bold text-yellow-600">0</p></div>
@@ -107,14 +102,12 @@
             <div class="bg-cardbg p-4 rounded-xl shadow-sm border-l-4 border-red-500 border border-bordercol"><p class="text-sm text-textmuted">🚨 Overdue</p><p id="metricOverdue" class="text-2xl font-bold text-red-600">0</p></div>
         </div>
 
-        <!-- Filters -->
         <div class="bg-cardbg p-4 rounded-xl shadow-sm mb-6 flex flex-wrap gap-4 items-center border border-bordercol">
-            <input type="text" id="searchInput" placeholder="🔍 Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="searchInput" placeholder=" Search Task or Remark..." class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none">
             <select id="filterStatus" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"><option value="">All Statuses</option></select>
             <select id="filterAssignee" class="border border-bordercol bg-cardbg text-textmain rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"><option value="">All Assignees</option></select>
         </div>
 
-        <!-- Data Table -->
         <div class="bg-cardbg rounded-xl shadow-sm overflow-hidden border border-bordercol">
             <div class="overflow-x-auto scrollbar-thin max-h-[65vh]">
                 <table class="min-w-full divide-y divide-bordercol" id="dataTable">
@@ -133,17 +126,15 @@
 
     <script>
         let rawData = [], headers = [], sortColumn = null, sortDirection = 'asc';
-        let showAllColumns = false; // NEW: Toggle for column visibility
-        let statusChartInstance = null, typeChartInstance = null, priorityChartInstance = null;
+        let showAllColumns = false;
+        let statusChartInstance = null, typeChartInstance = null, typeTaskChartInstance = null;
         const today = new Date(); today.setHours(0, 0, 0, 0);
 
-        // --- THEME LOGIC ---
         const themeSelector = document.getElementById('themeSelector');
         const savedTheme = localStorage.getItem('dashboard_theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme); themeSelector.value = savedTheme;
         themeSelector.addEventListener('change', (e) => { document.documentElement.setAttribute('data-theme', e.target.value); localStorage.setItem('dashboard_theme', e.target.value); showToast(`Theme changed to ${e.target.value}!`); });
 
-        // --- COLUMN TOGGLE LOGIC ---
         document.getElementById('toggleColumnsBtn').addEventListener('click', () => {
             showAllColumns = !showAllColumns;
             document.getElementById('toggleColumnsBtn').textContent = showAllColumns ? '🙈 Hide Extra Columns' : '👁️ Show All Columns';
@@ -154,10 +145,8 @@
         function formatDateForInput(dateVal) { if (!dateVal) return ''; let d = new Date(dateVal); if (isNaN(d)) return ''; return d.toISOString().split('T')[0]; }
 
         function getDisplayHeaders() {
-            // Core columns always shown, extra columns shown only if toggled
             const coreHeaders = ['Task', 'Task status', 'Assignee', 'Start Date', 'Due Date', 'Priority', 'Type', 'Remark'];
             const extraHeaders = ['Dependency', 'Type of task', 'Checker', 'Duration', 'Completed At', 'Predecessors'];
-            
             let result = coreHeaders.filter(h => headers.includes(h));
             if (showAllColumns) {
                 extraHeaders.forEach(h => { if (headers.includes(h) && !result.includes(h)) result.push(h); });
@@ -224,23 +213,46 @@
         }
 
         function createCharts() {
-            const statusCounts = {}, typeCounts = {}, priorityCounts = {};
-            rawData.forEach(r => { statusCounts[r['Task status'] || 'Not Set'] = (statusCounts[r['Task status'] || 'Not Set'] || 0) + 1; typeCounts[r['Type'] || 'Not Set'] = (typeCounts[r['Type'] || 'Not Set'] || 0) + 1; priorityCounts[r['Priority'] || 'Not Set'] = (priorityCounts[r['Priority'] || 'Not Set'] || 0) + 1; });
+            const statusCounts = {}, typeCounts = {}, typeTaskCounts = {};
+            rawData.forEach(r => { 
+                statusCounts[r['Task status'] || 'Not Set'] = (statusCounts[r['Task status'] || 'Not Set'] || 0) + 1; 
+                typeCounts[r['Type'] || 'Not Set'] = (typeCounts[r['Type'] || 'Not Set'] || 0) + 1;
+                typeTaskCounts[r['Type of task'] || 'Not Set'] = (typeTaskCounts[r['Type of task'] || 'Not Set'] || 0) + 1;
+            });
             const textColor = getComputedStyle(document.body).getPropertyValue('--text-main').trim(); const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-muted').trim();
             const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, color: textColor } } } };
-            if (statusChartInstance) statusChartInstance.destroy(); statusChartInstance = new Chart(document.getElementById('statusChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'] }] }, options: commonOptions });
-            if (typeChartInstance) typeChartInstance.destroy(); typeChartInstance = new Chart(document.getElementById('typeChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#667eea' }] }, options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 9 }, color: mutedColor } }, y: { beginAtZero: true, ticks: { font: { size: 9 }, color: mutedColor } } } } });
-            if (priorityChartInstance) priorityChartInstance.destroy(); priorityChartInstance = new Chart(document.getElementById('priorityChart').getContext('2d'), { type: 'pie', data: { labels: Object.keys(priorityCounts), datasets: [{ data: Object.values(priorityCounts), backgroundColor: ['#fbbf24', '#10b981', '#ef4444', '#6b7280'] }] }, options: commonOptions });
+            
+            if (statusChartInstance) statusChartInstance.destroy(); 
+            statusChartInstance = new Chart(document.getElementById('statusChart').getContext('2d'), { 
+                type: 'doughnut', 
+                data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'] }] }, 
+                options: commonOptions 
+            });
+            
+            if (typeChartInstance) typeChartInstance.destroy(); 
+            typeChartInstance = new Chart(document.getElementById('typeChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#667eea' }] }, 
+                options: { ...commonOptions, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 9 }, color: mutedColor } }, y: { beginAtZero: true, ticks: { font: { size: 9 }, color: mutedColor } } } } 
+            });
+
+            // NEW: Type of Task Chart (replaced Priority chart)
+            if (typeTaskChartInstance) typeTaskChartInstance.destroy(); 
+            typeTaskChartInstance = new Chart(document.getElementById('typeTaskChart').getContext('2d'), { 
+                type: 'doughnut', 
+                data: { labels: Object.keys(typeTaskCounts), datasets: [{ data: Object.values(typeTaskCounts), backgroundColor: ['#8b5cf6', '#10b981', '#6b7280'] }] }, 
+                options: commonOptions 
+            });
         }
 
         function generateInsights(total, completed, going, postponed) {
             const insights = [];
             const postponeRate = total > 0 ? (postponed / total) * 100 : 0;
-            if (postponeRate > 30) insights.push(`️ High postponement rate (${Math.round(postponeRate)}%) - review resource allocation`);
+            if (postponeRate > 30) insights.push(`⚠️ High postponement rate (${Math.round(postponeRate)}%) - review resource allocation`);
             const overdue = rawData.filter(r => { if (!r['Due Date']) return false; const dueDate = r['Due Date'] instanceof Date ? r['Due Date'] : new Date(r['Due Date']); return dueDate < today && !['done', 'on time done'].includes((r['Task status'] || '').toLowerCase()); }).length;
-            if (overdue > 0) insights.push(`🚨 ${overdue} tasks are overdue and need immediate attention`);
+            if (overdue > 0) insights.push(` ${overdue} tasks are overdue and need immediate attention`);
             const completionRate = total > 0 ? (completed / total) * 100 : 0;
-            if (completionRate < 40) insights.push(` Low completion rate (${Math.round(completionRate)}%) - review priorities`);
+            if (completionRate < 40) insights.push(`📉 Low completion rate (${Math.round(completionRate)}%) - review priorities`);
             if (going > 10) insights.push(`🔄 ${going} tasks in progress - monitor capacity`);
             document.getElementById('insightsList').innerHTML = insights.map(i => `<li>${i}</li>`).join('');
         }
@@ -253,18 +265,15 @@
 
         function renderHeaders() {
             const headerRow = document.getElementById('tableHeader');
-            headerRow.innerHTML = '<th class="px-3 py-3 text-left text-base font-medium text-textmuted uppercase tracking-wider w-[50px]">Actions</th>'; // Increased font size to text-base
+            headerRow.innerHTML = '<th class="px-3 py-3 text-left text-base font-medium text-textmuted uppercase tracking-wider w-[50px]">Actions</th>';
             getDisplayHeaders().forEach(h => {
                 const th = document.createElement('th');
-                th.className = 'px-3 py-3 text-left text-base font-medium text-textmuted uppercase tracking-wider sort-header sort-icon'; // Increased font size
+                th.className = 'px-3 py-3 text-left text-base font-medium text-textmuted uppercase tracking-wider sort-header sort-icon';
                 th.textContent = h; th.dataset.column = h; th.onclick = () => sortData(h);
-                
-                // Apply specific width classes for better fitting
                 if (h === 'Task') th.classList.add('task-cell');
                 else if (h === 'Remark') th.classList.add('remark-cell');
                 else if (h.includes('Date')) th.classList.add('date-cell');
                 else if (h === 'Task status' || h === 'Priority') th.classList.add('status-cell');
-                
                 headerRow.appendChild(th);
             });
         }
@@ -294,15 +303,14 @@
                 if (fStatus && status !== fStatus.toLowerCase()) return; if (fAssignee && assignee !== fAssignee) return; if (search && !task.includes(search) && !remark.includes(search)) return;
                 const tr = document.createElement('tr'); tr.className = 'hover:bg-headerbg';
                 if (row['Due Date']) { let dDate = new Date(row['Due Date']); if (!isNaN(dDate) && dDate < today && !['done', 'on time done'].includes(status)) tr.classList.add('bg-red-50'); }
-                const tdAction = document.createElement('td'); tdAction.className = 'px-3 py-3 text-base text-center'; // Increased font size
+                const tdAction = document.createElement('td'); tdAction.className = 'px-3 py-3 text-base text-center';
                 const delBtn = document.createElement('button'); delBtn.innerHTML = '🗑️'; delBtn.className = 'text-red-400 hover:text-red-600 text-lg';
                 delBtn.onclick = () => { if(confirm('Delete this task?')) { rawData.splice(rowIndex, 1); saveToLocalStorage(); renderTable(); updateMetrics(); generateAnalysis(); showToast("Task deleted"); } };
                 tdAction.appendChild(delBtn); tr.appendChild(tdAction);
                 getDisplayHeaders().forEach(h => {
                     const td = document.createElement('td'); 
-                    td.className = 'px-3 py-3 text-base editable-cell'; // Increased font size to text-base (16px)
+                    td.className = 'px-3 py-3 text-base editable-cell';
                     if (h === 'Task') td.classList.add('task-cell'); else if (h === 'Remark') td.classList.add('remark-cell');
-                    
                     let val = row[h]; if (h.includes('Date') && val instanceof Date) td.textContent = val.toLocaleDateString(); else td.textContent = val || '';
                     if (h === 'Task status') { if (status.includes('done')) td.classList.add('text-green-600', 'font-semibold'); else if (status === 'going') td.classList.add('text-blue-600', 'font-semibold'); else if (status === 'postpone') td.classList.add('text-orange-500', 'font-semibold'); }
                     if (h === 'Priority') { if (val === 'Yellow') td.classList.add('text-yellow-600', 'font-bold'); if (val === 'Green') td.classList.add('text-green-600', 'font-bold'); }
